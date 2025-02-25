@@ -1,7 +1,9 @@
 # CONNECT TO DATABASE
 pgcli -h localhost -p 5432 -u root -d ny_taxi
 
+docker start pg-database
 
+docker start pg-database
 
 # --- > Create a network 
 docker network create pg-network
@@ -23,3 +25,29 @@ docker network create pg-network
   --network=pg-network \
   --name pgadmin-2 \
   dpage/pgadmin4
+
+
+
+python ingest.py \
+    --user=root \
+    --password=root \
+    --host=localhost \
+    --port=5432 \
+    --db=ny_taxi \
+    --tb=ny_taxi_data \
+    --url="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
+    
+
+  docker run -it \
+  --network=pg-network \
+  taxi_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pg-database \
+    --port=5432 \
+    --db=ny_taxi \
+    --tb=ny_taxi_data \
+    --url="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
+
+
+docker build -t taxi_ingest:v001 .
